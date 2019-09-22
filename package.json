@@ -1,0 +1,52 @@
+{
+  "name": "mile-marker",
+  "author": "Kai",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Mile Marker",
+    "uuid": "af1b137d-46ed-4775-ba84-387804049382",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "basalt"
+    ],
+    "capabilities": [
+      "location"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [
+      "ready",
+      "lat",
+      "lon"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "bitmap",
+          "name": "ADD_BLACK",
+          "file": "images/add_black.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "ADD_WHITE",
+          "file": "images/add_white.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "PIN_BLACK",
+          "file": "images/pin_black.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "CAL_BLACK",
+          "file": "images/cal_black.png"
+        }
+      ]
+    }
+  }
+}
