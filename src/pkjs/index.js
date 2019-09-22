@@ -5,7 +5,7 @@ Pebble.addEventListener('ready', function() {
 
         longNum[0] = number;
 
-        return Array.from(new Uint8Array(buffer)).reverse();
+        return Array.from(new Uint8Array(buffer));
     }
 
     var options = {

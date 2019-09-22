@@ -12,8 +12,8 @@ TextLayer* s_lat_layer;
 TextLayer* s_lon_layer;
 char date_buf[16];
 char time_buf[16];
-char lat_buf[300];
-char lon_buf[300];
+char lat_buf[18];
+char lon_buf[18];
 
 void record_window_received_handler(DictionaryIterator *iter, void *context) {
     Tuple *lat_tuple = dict_find(iter, MESSAGE_KEY_lat);
@@ -30,11 +30,10 @@ void record_window_received_handler(DictionaryIterator *iter, void *context) {
         return;
     }
 
-    double d;
-    memcpy(&d, lat_tuple->value->data, sizeof(d));
-    g_fmt(lat_buf, d);
-    memcpy(&d, lon_tuple->value->data, sizeof(d));
-    g_fmt(lon_buf, d);
+    memcpy(&s_record->latitude, lat_tuple->value->data, sizeof(double));
+    fmt_dms(lat_buf, sizeof(lat_buf), s_record->latitude);
+    memcpy(&s_record->longitude, lon_tuple->value->data, sizeof(double));
+    fmt_dms(lon_buf, sizeof(lon_buf), s_record->longitude);
     layer_mark_dirty(text_layer_get_layer(s_lat_layer));
     layer_mark_dirty(text_layer_get_layer(s_lon_layer));
 }
@@ -50,6 +49,7 @@ void record_window_location_query() {
 
 void record_window_load(Window* window) {
     if(s_new) {
+        messages_callback_set(record_window_received_handler);
         record_window_location_query();
     }
 
@@ -92,33 +92,32 @@ void record_window_load(Window* window) {
     bitmap_layer_set_bitmap(s_pin_layer, s_pin_bitmap_black);
     layer_add_child(window_layer, bitmap_layer_get_layer(s_pin_layer));
 
-    g_fmt(lat_buf, s_record->latitude);
+    fmt_dms(lat_buf, sizeof(lat_buf), s_record->latitude);
     s_lat_layer = text_layer_create(GRect(30, pin_top - (pin_bounds.size.h / 2), 100, 15));
     text_layer_set_font(s_lat_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
     text_layer_set_text(s_lat_layer, lat_buf);
     layer_add_child(window_layer, text_layer_get_layer(s_lat_layer));
 
-    g_fmt(lon_buf, s_record->longitude);
+    fmt_dms(lon_buf, sizeof(lon_buf), s_record->longitude);
     s_lon_layer = text_layer_create(GRect(30, pin_top + (pin_bounds.size.h / 2), 100, 15));
     text_layer_set_font(s_lon_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
     text_layer_set_text(s_lon_layer, lon_buf);
     layer_add_child(window_layer, text_layer_get_layer(s_lon_layer));
-
-    if(s_new) {
-        records_save(s_record);
-    }
 }
 
 void record_window_unload(Window* window) {
+    if(s_new) {
+        records_save(s_record);
+    }
+
+    messages_callback_clear();
+
     text_layer_destroy(s_label_layer);
     text_layer_destroy(s_date_layer);
     text_layer_destroy(s_time_layer);
     bitmap_layer_destroy(s_pin_layer);
     text_layer_destroy(s_lat_layer);
     text_layer_destroy(s_lon_layer);
-
-    lat_buf[0] = '\0';
-    lon_buf[0] = '\0';
 }
 
 Window* record_window_create(record_t* record, bool new) {
@@ -133,16 +132,10 @@ Window* record_window_create(record_t* record, bool new) {
     s_new = new;
     s_record = record;
 
-    if(new) {
-        messages_callback_set(record_window_received_handler);
-    }
-
     return s_record_window;
 }
 
 void record_window_destroy(void) {
-    messages_callback_clear();
-
     free(s_record);
     s_record = NULL;
 
