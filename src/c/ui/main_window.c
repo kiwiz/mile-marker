@@ -34,34 +34,49 @@ void main_window_add_button_draw(GContext* ctx, const Layer* cell_layer) {
     ));
 }
 
-    graphics_context_set_compositing_mode(ctx, GCompOpSet);
+void main_window_record_draw(GContext* ctx, const Layer* cell_layer, const MenuIndex* cell_index) {
+    GRect bounds = layer_get_bounds(cell_layer);
 
-    GBitmap *imageToUse = menu_cell_layer_is_highlighted(cell_layer) ? s_add_bitmap_white:s_add_bitmap_black;
+    char date_buf[16];
 
-    graphics_draw_bitmap_in_rect(ctx, imageToUse, GRect(pos.x, pos.y, bitmap_bounds.size.w, bitmap_bounds.size.h));
+    // load in record
+    record_t record;
+    records_load(&record, cell_index->row - 1);
+
+    tm* time_parts = localtime(&record.timestamp);
+
+    // format & draw time
+    strftime(date_buf, sizeof(date_buf), "%H:%M:%S", time_parts);
+    graphics_draw_text(ctx, date_buf, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(
+        bounds.origin.x + bounds.size.h + 3, bounds.origin.y - 4, bounds.size.w - bounds.size.h, 24
+    ), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+
+    // format & draw date
+    strftime(date_buf, sizeof(date_buf), "%Y-%m-%d", time_parts);
+    graphics_draw_text(ctx, date_buf, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(
+        bounds.origin.x + bounds.size.h + 3, bounds.origin.y + 20, bounds.size.w - bounds.size.h, 18
+    ), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+
+    graphics_draw_text(ctx, record.emoji, s_emoji_font, GRect(
+        bounds.origin.x + 2, bounds.origin.y, bounds.size.h, bounds.size.h
+    ), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }
 
-void main_window_draw_row(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* callback_context) {
-    char date_buf[32];
-
+void main_window_draw_row(GContext* ctx, const Layer* cell_layer, const MenuIndex* cell_index, void* callback_context) {
     if(cell_index->row == 0) {
         main_window_add_button_draw(ctx, cell_layer);
     } else {
-        record_t record;
-        records_load(&record, cell_index->row - 1);
-
-        tm* time_parts = localtime(&record.timestamp);
-        strftime(date_buf, sizeof(date_buf), "%Y-%m-%d %H:%M:%S", time_parts);
-        menu_cell_basic_draw(ctx, cell_layer, record.emoji, date_buf, NULL);
+        main_window_record_draw(ctx, cell_layer, cell_index);
     }
 }
 
 void main_window_select_click(MenuLayer* menu_layer, MenuIndex* cell_index, void* callback_context) {
     record_t* record = calloc(sizeof(record_t), 1);
     bool new = false;
+
+    // determine if target exists & get a record according
     if(cell_index->row == 0) {
         record->timestamp = time(NULL);
-        record->emoji[0] = 'c';
         new = true;
     } else {
         records_load(record, cell_index->row - 1);
