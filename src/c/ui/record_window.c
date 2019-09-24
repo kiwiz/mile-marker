@@ -4,6 +4,7 @@ record_t* s_record;
 bool s_new;
 Window* s_record_window;
 TextLayer* s_label_layer;
+TextLayer* s_emoji_layer;
 BitmapLayer* s_cal_layer;
 TextLayer* s_date_layer;
 TextLayer* s_time_layer;
@@ -65,7 +66,14 @@ void record_window_load(Window* window) {
     text_layer_set_text(s_label_layer, "Add marker");
     layer_add_child(window_layer, text_layer_get_layer(s_label_layer));
 
-    int16_t cal_top = label_top + 80;
+    int16_t emoji_top = label_top + 40;
+    s_emoji_layer = text_layer_create(GRect(0, emoji_top, frame.size.w, 32));
+    text_layer_set_font(s_emoji_layer, s_emoji_font);
+    text_layer_set_text_alignment(s_emoji_layer, GTextAlignmentCenter);
+    text_layer_set_text(s_emoji_layer, s_record->emoji);
+    layer_add_child(window_layer, text_layer_get_layer(s_emoji_layer));
+
+    int16_t cal_top = emoji_top + 30;
     GRect cal_bounds = gbitmap_get_bounds(s_cal_bitmap_black);
     s_cal_layer = bitmap_layer_create(GRect(10, cal_top, cal_bounds.size.w, cal_bounds.size.h));
     bitmap_layer_set_compositing_mode(s_cal_layer, GCompOpSet);

@@ -5,10 +5,13 @@ AppMessageInboxReceived s_callback;
 
 void messages_received_handler(DictionaryIterator* iterator, void* context) {
     Tuple *ready_tuple = dict_find(iterator, MESSAGE_KEY_ready);
+    // handle ready message
     if(ready_tuple != NULL) {
         s_ready = true;
+        return;
     }
 
+    // trigger callback if set
     if(s_callback != NULL) {
         s_callback(iterator, context);
     }

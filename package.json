@@ -28,16 +28,6 @@
       "media": [
         {
           "type": "bitmap",
-          "name": "ADD_BLACK",
-          "file": "images/add_black.png"
-        },
-        {
-          "type": "bitmap",
-          "name": "ADD_WHITE",
-          "file": "images/add_white.png"
-        },
-        {
-          "type": "bitmap",
           "name": "PIN_BLACK",
           "file": "images/pin_black.png"
         },
@@ -45,6 +35,12 @@
           "type": "bitmap",
           "name": "CAL_BLACK",
           "file": "images/cal_black.png"
+        },
+        {
+          "type": "font",
+          "name": "EMOJI_32",
+          "file": "fonts/noto.ttf",
+          "characterRegex": "[🔥🏔🌋🏕🏖🏜🏝🏞🏟🏛🏗🏠🏢🏤🏥🏦🏨🏪🏫🏬🏭🏰💒⛪⛲⛺🌃🏙🌅🌇🌉♨🎠🎡🎢💈🎪🚂🚃🚄🚈🚝🚋🚌🚎🚑🚒🚓🚕🚗🚙🚚🚛🚜🏎🏍🛵🚲🛴🛹🛣🛤🛢⛽🚨🚥🚦🛑🚧⛵🛶🚤🛳⛴🛥🚢✈]"
         }
       ]
     }

@@ -1,5 +1,8 @@
 #include "main_window.h"
 
+#define DRAW_ADD_SIZE 12
+#define DRAW_ADD_WIDTH 2
+
 Window* s_main_window;
 MenuLayer* s_menu_layer;
 
@@ -13,11 +16,23 @@ uint16_t main_window_get_num_rows(MenuLayer* menu_layer, uint16_t section_index,
 
 void main_window_add_button_draw(GContext* ctx, const Layer* cell_layer) {
     GRect bounds = layer_get_bounds(cell_layer);
-    GRect bitmap_bounds = gbitmap_get_bounds(s_add_bitmap_black);
 
-    GPoint pos;
-    pos.x = (bounds.size.w / 2) - (bitmap_bounds.size.w / 2);
-    pos.y = (bounds.size.h / 2) - (bitmap_bounds.size.h / 2);
+    graphics_context_set_stroke_color(ctx, menu_cell_layer_is_highlighted(cell_layer) ? GColorWhite:GColorBlack);
+
+    // draw vert line
+    graphics_draw_rect(ctx, GRect(
+        (bounds.size.w / 2) - (DRAW_ADD_WIDTH / 2),
+        (bounds.size.h / 2) - (DRAW_ADD_SIZE / 2),
+        DRAW_ADD_WIDTH, DRAW_ADD_SIZE
+    ));
+
+    // draw horiz line
+    graphics_draw_rect(ctx, GRect(
+        (bounds.size.w / 2) - (DRAW_ADD_SIZE / 2),
+        (bounds.size.h / 2) - (DRAW_ADD_WIDTH / 2),
+        DRAW_ADD_SIZE, DRAW_ADD_WIDTH
+    ));
+}
 
     graphics_context_set_compositing_mode(ctx, GCompOpSet);
 
