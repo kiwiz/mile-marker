@@ -2,6 +2,7 @@
 #define messages_h
 
 #include <pebble.h>
+#include "record.h"
 
 void messages_init(void);
 void messages_deinit(void);

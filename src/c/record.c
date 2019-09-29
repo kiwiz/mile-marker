@@ -1,5 +1,14 @@
 #include "record.h"
 
+record_t* record_create(void) {
+	record_t* record = calloc(sizeof(record_t), 1);
+	record->timestamp = time(NULL);
+	record->latitude = NAN;
+	record->longitude = NAN;
+
+	return record;
+}
+
 size_t records_count(void) {
 	return persist_read_int(STORAGE_RECORDS_COUNT_KEY);
 }

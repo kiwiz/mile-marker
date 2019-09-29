@@ -2,9 +2,13 @@
   "name": "mile-marker",
   "author": "Kai",
   "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "pebble-clay": "^1.0.4"
+  },
   "pebble": {
     "displayName": "Mile Marker",
     "uuid": "af1b137d-46ed-4775-ba84-387804049382",
@@ -14,13 +18,17 @@
       "basalt"
     ],
     "capabilities": [
-      "location"
+      "location",
+      "configurable"
     ],
     "watchapp": {
       "watchface": false
     },
     "messageKeys": [
       "ready",
+      "fetch",
+      "data",
+      "pos",
       "lat",
       "lon"
     ],
@@ -37,10 +45,15 @@
           "file": "images/cal_black.png"
         },
         {
+          "type": "bitmap",
+          "name": "CHECK_WHITE",
+          "file": "images/action_bar_check_white.png"
+        },
+        {
           "type": "font",
           "name": "EMOJI_32",
-          "file": "fonts/noto.ttf",
-          "characterRegex": "[🔥🏔🌋🏕🏖🏜🏝🏞🏟🏛🏗🏠🏢🏤🏥🏦🏨🏪🏫🏬🏭🏰💒⛪⛲⛺🌃🏙🌅🌇🌉♨🎠🎡🎢💈🎪🚂🚃🚄🚈🚝🚋🚌🚎🚑🚒🚓🚕🚗🚙🚚🚛🚜🏎🏍🛵🚲🛴🛹🛣🛤🛢⛽🚨🚥🚦🛑🚧⛵🛶🚤🛳⛴🛥🚢✈]"
+          "file": "fonts/seguiemj.ttf",
+          "characterRegex": "[🏠🏢⛲🏬🏖🏞🚗🚈🚌🚕🚲⛴✈🍽🚽🛁🛏💻📺🎧🎮🎲🚶📕🛋🛒]"
         }
       ]
     }

@@ -2,6 +2,7 @@
 #define record_window_h
 
 #include <pebble.h>
+#include "select_layer.h"
 #include "../resources.h"
 #include "../record.h"
 #include "../messages.h"
