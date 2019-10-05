@@ -2,6 +2,7 @@ var Clay = require('pebble-clay')
 var clayConfig = require('./config')
 var clay = new Clay(clayConfig, null, {autoHandleEvents: false})
 clay.registerComponent(require('./list-component'))
+clay.registerComponent(require('./export-component'))
 
 var markers = []
 

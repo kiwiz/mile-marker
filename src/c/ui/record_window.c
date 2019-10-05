@@ -1,7 +1,7 @@
 #include "record_window.h"
 
 record_t* s_record;
-bool s_new;
+size_t s_index;
 Window* s_record_window;
 TextLayer* s_label_layer;
 SelectLayer* s_select_layer;
@@ -19,7 +19,11 @@ char time_buf[16];
 char lat_buf[18];
 char lon_buf[18];
 
-void record_window_location_query() {
+bool record_window_is_new(void) {
+    return s_index == STORAGE_RECORDS_INDEX_NEW;
+}
+
+void record_window_location_query(void) {
     DictionaryIterator* iterator;
     if(app_message_outbox_begin(&iterator) != APP_MSG_OK) {
         return;
@@ -36,10 +40,10 @@ void record_window_show_loading(bool show) {
     layer_set_hidden(text_layer_get_layer(s_lon_layer), show);
 }
 
-void record_window_received_handler(DictionaryIterator *iter, void *context) {
-    Tuple *lat_tuple = dict_find(iter, MESSAGE_KEY_lat);
-    Tuple *lon_tuple = dict_find(iter, MESSAGE_KEY_lon);
-    Tuple *ready_tuple = dict_find(iter, MESSAGE_KEY_ready);
+void record_window_received_handler(DictionaryIterator* iter, void* context) {
+    Tuple* lat_tuple = dict_find(iter, MESSAGE_KEY_lat);
+    Tuple* lon_tuple = dict_find(iter, MESSAGE_KEY_lon);
+    Tuple* ready_tuple = dict_find(iter, MESSAGE_KEY_ready);
 
     // kick off a query if the app just became ready
     if(ready_tuple != NULL) {
@@ -83,8 +87,17 @@ void record_window_click_handler(ClickRecognizerRef recognizer, void* context) {
     }
 }
 
+void record_window_delete_record(void* context) {
+    records_delete(s_index);
+    window_stack_remove(s_record_window, true);
+}
+
+void record_window_click_provider(void* context) {
+    window_single_click_subscribe(BUTTON_ID_DOWN, (ClickHandler)record_window_delete_record);
+}
+
 void record_window_load(Window* window) {
-    if(s_new) {
+    if(record_window_is_new()) {
         messages_callback_set(record_window_received_handler);
         record_window_location_query();
     }
@@ -95,12 +108,13 @@ void record_window_load(Window* window) {
     GFont text_font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
     tm* time_parts = localtime(&s_record->timestamp);
 
+    // add action bar layer
     GRect action_bar_frame = GRect(0, 0, 0, 0);
     s_action_bar_layer = action_bar_layer_create();
-    if(!s_new) {
-        action_bar_layer_set_icon(s_action_bar_layer, BUTTON_ID_SELECT, s_check_bitmap_white);
+    if(!record_window_is_new()) {
+        action_bar_layer_set_icon(s_action_bar_layer, BUTTON_ID_DOWN, s_delete_bitmap_white);
         action_bar_layer_add_to_window(s_action_bar_layer, window);
-        // action_bar_layer_set_click_config_provider(s_action_bar_layer, (ClickConfigProvider)record_window_click_provider);
+        action_bar_layer_set_click_config_provider(s_action_bar_layer, (ClickConfigProvider)record_window_click_provider);
         action_bar_frame = layer_get_bounds(action_bar_layer_get_layer(s_action_bar_layer));
     }
 
@@ -109,7 +123,7 @@ void record_window_load(Window* window) {
     s_label_layer = text_layer_create(GRect(frame.origin.x, label_top, frame.size.w - action_bar_frame.size.w, 24));
     text_layer_set_font(s_label_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
     text_layer_set_text_alignment(s_label_layer, GTextAlignmentCenter);
-    text_layer_set_text(s_label_layer, s_new ? "Add marker":"View marker");
+    text_layer_set_text(s_label_layer, record_window_is_new() ? "Add marker":"View marker");
     layer_add_child(window_layer, text_layer_get_layer(s_label_layer));
 
     // add emoji layer
@@ -117,7 +131,7 @@ void record_window_load(Window* window) {
     s_select_layer = select_layer_create(GRect(frame.origin.x, emoji_top, frame.size.w - action_bar_frame.size.w, 40));
     select_layer_add_choices(s_select_layer, location_emojis, LOCATION_EMOJI_COUNT);
     select_layer_add_choices(s_select_layer, action_emojis, ACTION_EMOJI_COUNT);
-    select_layer_set_disabled(s_select_layer, !s_new);
+    select_layer_set_disabled(s_select_layer, !record_window_is_new());
     select_layer_set_click_config_onto_window(s_select_layer, window);
     select_layer_set_callbacks(s_select_layer, NULL, (SelectLayerCallbacks){
         .back_click=record_window_click_handler,
@@ -161,7 +175,7 @@ void record_window_load(Window* window) {
     int16_t pin_text_left = frame.origin.x + 6 + pin_bounds.size.w + 6;
     s_loading_layer = text_layer_create(GRect(pin_text_left, pin_top - 5, frame.size.w - pin_text_left - action_bar_frame.size.w, 20));
     text_layer_set_font(s_loading_layer, text_font);
-    text_layer_set_text(s_loading_layer, (s_new) ? "Loading...":"Unavailable");
+    text_layer_set_text(s_loading_layer, record_window_is_new() ? "Loading...":"Unavailable");
     layer_add_child(window_layer, text_layer_get_layer(s_loading_layer));
 
     // add lat layer
@@ -178,7 +192,7 @@ void record_window_load(Window* window) {
     text_layer_set_text(s_lon_layer, lon_buf);
     layer_add_child(window_layer, text_layer_get_layer(s_lon_layer));
 
-    record_window_show_loading(s_new || (s_record->latitude != s_record->latitude));
+    record_window_show_loading(record_window_is_new() || (s_record->latitude != s_record->latitude));
 }
 
 void record_window_unload(Window* window) {
@@ -192,10 +206,11 @@ void record_window_unload(Window* window) {
     bitmap_layer_destroy(s_pin_layer);
     text_layer_destroy(s_lat_layer);
     text_layer_destroy(s_lon_layer);
+    text_layer_destroy(s_loading_layer);
     action_bar_layer_destroy(s_action_bar_layer);
 }
 
-Window* record_window_create(record_t* record, bool new) {
+Window* record_window_create(record_t* record, size_t idx) {
     if(s_record_window != NULL) {
         record_window_destroy();
     }
@@ -206,7 +221,7 @@ Window* record_window_create(record_t* record, bool new) {
         .unload = record_window_unload,
     });
 
-    s_new = new;
+    s_index = idx;
     s_record = record;
 
     return s_record_window;

@@ -7,8 +7,8 @@
 #define MAX_CHOICES 3
 
 typedef struct {
-    void(* back_click)(ClickRecognizerRef recognizer, void *context);
-    void(* select_click)(ClickRecognizerRef recognizer, void *context);
+    void(* back_click)(ClickRecognizerRef recognizer, void* context);
+    void(* select_click)(ClickRecognizerRef recognizer, void* context);
 } SelectLayerCallbacks;
 
 typedef struct {

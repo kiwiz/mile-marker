@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define LOG(...) APP_LOG(APP_LOG_LEVEL_WARNING, __VA_ARGS__)
+#define MENU_CELL_BASIC_CELL_HEIGHT 44
 
 void fmt_dms(char* buf, size_t len, double val);
 size_t char_len(char* buf, size_t len);

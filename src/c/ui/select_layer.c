@@ -4,7 +4,7 @@
 #define SLD_BOX_SIZE 44
 #define SLD_BOX_OFFSET(data, n) (SLD_BOX_SIZE * n + data->padding * (n + 1))
 
-void select_layer_update_proc(Layer *layer, GContext *ctx) {
+void select_layer_update_proc(Layer* layer, GContext* ctx) {
     SelectLayerData* data = layer_get_data(layer);
 
     if(!data->disabled) {
@@ -32,14 +32,17 @@ void select_layer_add_choices(SelectLayer* select_layer, char** choices, size_t 
     SelectLayerData* data = layer_get_data(select_layer);
     GRect frame = layer_get_frame(select_layer);
 
+    // check that we haven't hit the limit
     size_t level = data->levels;
     if(level >= MAX_CHOICES) {
         level = MAX_CHOICES - 1;
     }
+
     data->choice_data[level] = choices;
     data->choice_nums[level] = num;
     ++data->levels;
 
+    // update the cursor padding & offset
     data->cursor_offset = data->padding = (frame.size.w - (SLD_BOX_SIZE * data->levels)) / (data->levels + 1);
 }
 
@@ -73,6 +76,7 @@ void select_layer_load_selections(SelectLayer* select_layer, char* buf) {
         size_t choice_len = char_len(buf + offset, len - offset);
         data->curr_choice[i] = 0;
 
+        // check if the current character matches a valid selection
         bool found = false;
         for(size_t j = 0; j < data->choice_nums[i]; ++j) {
             if(strncmp(buf + offset, data->choice_data[i][j], choice_len) == 0) {
@@ -98,6 +102,8 @@ void select_layer_save_selections(SelectLayer* select_layer, char* buf, size_t l
         if(len <= offset + choice_len) {
             break;
         }
+
+        // write the current character to the output buffer
         strncpy(buf + offset, choice, choice_len + 1);
         offset += choice_len;
     }
@@ -132,6 +138,7 @@ void select_layer_animate_level(SelectLayer* select_layer, size_t i) {
     PropertyAnimation* property_animation = property_animation_create(&select_layer_cursor_animation_impl, select_layer, NULL, NULL);
     Animation* animation = property_animation_get_animation(property_animation);
 
+    // configure animation between levels
     size_t from_value = select_layer_get_cursor_offset(select_layer);
     size_t to_value = SLD_BOX_OFFSET(data, i);
     property_animation_from(property_animation, &from_value, sizeof(from_value), true);
@@ -155,6 +162,7 @@ void select_layer_click_handler(ClickRecognizerRef recognizer, void* context) {
             if(data->curr_level + 1 >= data->levels) {
                 data->callbacks.select_click(recognizer, data->callback_context);
             } else {
+                // advance to next level
                 ++data->curr_level;
                 select_layer_animate_level(context, data->curr_level);
                 layer_mark_dirty(context);
@@ -164,6 +172,7 @@ void select_layer_click_handler(ClickRecognizerRef recognizer, void* context) {
             if(data->curr_level == 0) {
                 data->callbacks.back_click(recognizer, data->callback_context);
             } else {
+                // return to previous level
                 --data->curr_level;
                 select_layer_animate_level(context, data->curr_level);
                 layer_mark_dirty(context);
@@ -193,6 +202,7 @@ void select_layer_set_click_config_onto_window(SelectLayer* select_layer, Window
 
     window_set_click_config_provider_with_context(window, (ClickConfigProvider)select_layer_click_provider, select_layer);
 }
+
 void select_layer_set_callbacks(SelectLayer* select_layer, void* callback_context, SelectLayerCallbacks select_layer_callbacks) {
     SelectLayerData* data = layer_get_data(select_layer);
 

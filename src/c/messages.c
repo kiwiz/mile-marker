@@ -19,6 +19,7 @@ void messages_fetch_handler(size_t i) {
     buf.record_size = sizeof(record_t);
     buf.chunk = i;
 
+    // populate payload struct
     int delta = records_count() - STORAGE_RECORDS_PER_KEY * i;
     if(delta > 0) {
         persist_read_data(i, &buf.records, STORAGE_RECORDS_PER_KEY * sizeof(record_t));
@@ -29,22 +30,25 @@ void messages_fetch_handler(size_t i) {
         buf.count = 0;
     }
 
+    // add to dict
     if(app_message_outbox_begin(&iterator) != APP_MSG_OK) {
         return;
     }
     dict_write_data(iterator, MESSAGE_KEY_data, (uint8_t*)&buf, sizeof(fetchdata_t));
 
+    // send to phone
     app_message_outbox_send();
 }
 
 void messages_received_handler(DictionaryIterator* iterator, void* context) {
-    Tuple *ready_tuple = dict_find(iterator, MESSAGE_KEY_ready);
+    Tuple* ready_tuple = dict_find(iterator, MESSAGE_KEY_ready);
     // handle ready message
     if(ready_tuple != NULL) {
         s_ready = true;
     }
 
-    Tuple *fetch_tuple = dict_find(iterator, MESSAGE_KEY_fetch);
+    // handle fetch message
+    Tuple* fetch_tuple = dict_find(iterator, MESSAGE_KEY_fetch);
     if(
         fetch_tuple != NULL &&
         fetch_tuple->type == TUPLE_INT &&
@@ -65,7 +69,9 @@ bool messages_ready(void) {
 
 void messages_init(void) {
     app_message_register_inbox_received((AppMessageInboxReceived) messages_received_handler);
-    app_message_open(8 + 8 + 4, sizeof(fetchdata_t) + 8);
+    // allocate enough space for messages
+    // the additional bytes are somewhat arbitrary, but work
+    app_message_open(8 + 2, sizeof(fetchdata_t) + 8);
 }
 
 void messages_deinit(void) {

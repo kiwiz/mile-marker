@@ -9,7 +9,7 @@
 #include "../util.h"
 #include "../emoji.h"
 
-Window* record_window_create(record_t* record, bool new);
+Window* record_window_create(record_t* record, size_t idx);
 void record_window_destroy();
 
 #endif
