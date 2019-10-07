@@ -4,13 +4,19 @@ Mile Marker
 A Pebble watchapp for keeping track of where you are throughout the day!
 
 Drop a marker and annotate with a variety of fun emojis.
+
 ![Adding a marker](/img/adding-a-marker.png)
 
+
 Manage and view markers directly from your watch.
+
 ![Managing markers](/img/managing-markers.png)
 
+
 All data is stored on the Pebble and can be exported through your phone.
+
 ![Exporting markers](/img/exporting-markers.png)
+
 
 Building
 --------
