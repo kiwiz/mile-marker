@@ -31,7 +31,7 @@ module.exports = {
             const date = (new Date(markers[i].timestamp * 1000))
             let location = 'Unavailable'
             if(!Number.isNaN(markers[i].latitude)) {
-                location = markers[i].latitude, ', ', markers[i].longitude
+                location = markers[i].latitude + ', ' + markers[i].longitude
             }
 
             chunks.push([
