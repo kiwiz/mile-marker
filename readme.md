@@ -1,7 +1,7 @@
 Mile Marker
 ===========
 
-A Pebble watchapp for keeping track of where you are throughout the day!
+A Pebble watchapp for keeping track of where you are throughout the day.
 
 Drop a marker and annotate with a variety of fun emojis.
 
